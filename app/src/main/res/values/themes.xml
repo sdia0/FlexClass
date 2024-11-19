@@ -6,4 +6,10 @@
     </style>
 
     <style name="Theme.FlexClass" parent="Base.Theme.FlexClass" />
+
+    <style name="CustomEditText" parent="Widget.AppCompat.EditText">
+        <item name="colorControlNormal">@color/white</item> <!-- Цвет линии в обычном состоянии -->
+        <item name="colorControlActivated">@color/white</item> <!-- Цвет линии при фокусе -->
+        <item name="colorControlHighlight">@color/white</item> <!-- Цвет при нажатии -->
+    </style>
 </resources>

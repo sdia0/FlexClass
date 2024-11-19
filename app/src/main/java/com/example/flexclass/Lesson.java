@@ -2,7 +2,7 @@ package com.example.flexclass;
 
 public class Lesson {
     int id;
-    String time, format, title, type, day, week;
+    String time, format, title, type, day, week, aud, link;
     public Lesson(String time, String format, String title, String type, String day, String week) {
         this.time = time;
         this.format = format;
@@ -10,6 +10,32 @@ public class Lesson {
         this.type = type;
         this.day = day;
         this.week = week;
+    }
+    public Lesson(String time, String format, String title, String type, String day, String week, String aud, String link) {
+        this.time = time;
+        this.format = format;
+        this.title = title;
+        this.type = type;
+        this.day = day;
+        this.week = week;
+        this.aud = aud;
+        this.link = link;
+    }
+
+    public String getAud() {
+        return aud;
+    }
+
+    public void setAud(String aud) {
+        this.aud = aud;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
     }
 
     public int getId() {

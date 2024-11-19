@@ -3,70 +3,130 @@ package com.example.flexclass;
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class DayAdapter extends BaseAdapter {
+public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
+
     private Context context;
     private DaySchedule daySchedule;
-    View vFormat;
+
+    // Конструктор для передачи контекста и данных
     public DayAdapter(Context context, DaySchedule daySchedule) {
         this.context = context;
         this.daySchedule = daySchedule;
     }
 
+    // Создание ViewHolder
+    @NonNull
     @Override
-    public int getCount() {
-        return daySchedule.getLessons().size();
+    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.activity_item, parent, false);
+        return new MyViewHolder(view);
     }
 
+    // Привязка данных к ViewHolder
     @Override
-    public Object getItem(int position) {
-        return daySchedule.getLessons().get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.activity_item, parent, false);
-        }
-
-        // Получаем текущий элемент из списка
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Lesson lesson = daySchedule.getLessons().get(position);
 
-        // Устанавливаем значения для UI-элементов
-        ((TextView) convertView.findViewById(R.id.tvTime)).setText(lesson.getTimeStart());
-        ((TextView) convertView.findViewById(R.id.tvSubject)).setText(lesson.getTitle());
-        ((TextView) convertView.findViewById(R.id.tvType)).setText(lesson.getType());
+        holder.tvTime.setText(lesson.getTimeStart());
+        holder.tvSubject.setText(lesson.getTitle());
+        holder.tvType.setText(lesson.getType());
 
         // Настраиваем круг с цветом
-        View vFormat = convertView.findViewById(R.id.vFormat);
         GradientDrawable drawable = new GradientDrawable();
         drawable.setShape(GradientDrawable.OVAL);
         drawable.setColor(getColor(lesson.getFormat()));
-        vFormat.setBackground(drawable);
+        holder.vFormat.setBackground(drawable);
 
-        return convertView;
+        holder.tvTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                makeToast("до " + lesson.getTimeEnd());
+            }
+        });
+
+        holder.vFormat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                makeToast(lesson.getFormat());
+            }
+        });
+
+        holder.tvSubject.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (lesson.getFormat().equals("Онлайн")) makeToast("Долгое нажатие откроет ссылку");
+            }
+        });
+        holder.tvType.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (lesson.getFormat().equals("Онлайн")) makeToast("Долгое нажатие откроет ссылку");
+            }
+        });
+        holder.tvSubject.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                // Ваш код для обработки долгого нажатия
+                if (lesson.getFormat().equals("Онлайн")) Toast.makeText(v.getContext(), "Долгое нажатие!", Toast.LENGTH_SHORT).show();
+                else makeToast(lesson.getAud());
+                return true; // Возвращаем true, чтобы событие было обработано
+            }
+        });
+        holder.tvType.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (lesson.getFormat().equals("Онлайн")) Toast.makeText(v.getContext(), "Долгое нажатие!", Toast.LENGTH_SHORT).show();
+                else makeToast(lesson.getAud());
+                return true; // Возвращаем true, чтобы событие было обработано
+            }
+        });
     }
 
-    public int getColor(String format) {
-        if (format.equals("Онлайн")) return ContextCompat.getColor(context, R.color.white);
-        else return ContextCompat.getColor(context, R.color.yellow);
+    // Количество элементов
+    @Override
+    public int getItemCount() {
+        return daySchedule.getLessons().size();
+    }
+
+    // Метод для получения цвета по типу
+    private int getColor(String format) {
+        if (format.equals("Онлайн"))
+            return ContextCompat.getColor(context, R.color.white);
+        else
+            return ContextCompat.getColor(context, R.color.yellow);
     }
 
     public void updateDayTitle(TextView tvDay, String day) {
         tvDay.setVisibility(View.VISIBLE);
         tvDay.setText(day);
+    }
+    public void makeToast(String message) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+    }
+
+    // ViewHolder для хранения View
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
+        TextView tvTime, tvSubject, tvType;
+        View vFormat;
+
+        public MyViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvTime = itemView.findViewById(R.id.tvTime);
+            tvSubject = itemView.findViewById(R.id.tvSubject);
+            tvType = itemView.findViewById(R.id.tvType);
+            vFormat = itemView.findViewById(R.id.vFormat);
+        }
     }
 }

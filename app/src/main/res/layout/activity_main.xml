@@ -15,8 +15,11 @@
         android:background="@color/dark_blue"
         android:orientation="horizontal">
 
-        <Spinner
+        <TextView
             android:id="@+id/spWeek"
+            android:text="Четная неделя"
+            android:textSize="24sp"
+            android:textColor="@color/white"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"

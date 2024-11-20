@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -48,6 +49,8 @@ public class DbHelper extends SQLiteOpenHelper {
                 db.insert("lessons", null, values);
             }
             db.setTransactionSuccessful(); // Подтвердить транзакцию
+        }  catch (Exception e) {
+            Log.e("DB_ERROR", "Error while inserting data: " + e.getMessage());
         } finally {
             db.endTransaction(); // Завершить транзакцию
         }*/

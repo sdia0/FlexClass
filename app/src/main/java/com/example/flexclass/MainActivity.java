@@ -1,6 +1,7 @@
 package com.example.flexclass;
 
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,8 +27,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     TextView day;
-    Spinner spWeek;
     ImageButton btnAdd;
+    DbHelper db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,22 +50,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        spWeek = findViewById(R.id.spWeek);
-
-        // Создаем массив данных для Spinner
-        List<String> spinnerItems = new ArrayList<>(Arrays.asList("Четная неделя", "Нечетная неделя"));
-
-        // Создаем адаптер для Spinner
-        ArrayAdapter<String> spAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, spinnerItems);
-        spAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spWeek.setAdapter(spAdapter);
-
         day = findViewById(R.id.tvDay);
 
         List<String> days = new ArrayList<>(Arrays.asList("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"));
 
         List<DaySchedule> weekSchedule = new ArrayList<>();
-        DbHelper  db = new DbHelper(this);
+        db = new DbHelper(this);
+        //fillData();
         weekSchedule.add(new DaySchedule("Monday", db.getScheduleForDay(days.get(0))));
         weekSchedule.add(new DaySchedule("Tuesday", db.getScheduleForDay(days.get(1))));
         weekSchedule.add(new DaySchedule("Wednesday", db.getScheduleForDay(days.get(2))));
@@ -117,5 +109,38 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
         return lessons;
+    }
+    void fillData() {
+        String packageName = getPackageName(); // Получаем имя пакета приложения
+
+        // Данные для вставки
+        List<Lesson> lessons = new ArrayList<>();
+
+        lessons.add(new Lesson("10:00-11:20", "Оффлайн", "Системы ИИ", "лб", "Понедельник", "Четная неделя", "2/628", ""));
+        lessons.add(new Lesson("11:30-12:50", "Онлайн", "Физика", "пр", "Понедельник", "Четная неделя", "", "ссылка"));
+
+        lessons.add(new Lesson("13:00-14:20", "Онлайн", "УП", "лб", "Вторник", "Четная неделя", "", "ссылка"));
+        lessons.add(new Lesson("11:30-12:50", "Онлайн", "ТРПО", "пр", "Вторник", "Четная неделя", "", "ссылка"));
+
+        lessons.add(new Lesson("15:00-16:20", "Оффлайн", "КС", "пр", "Четверг", "Четная неделя", "2/628", ""));
+        lessons.add(new Lesson("16:30-17:50", "Онлайн", "Физика", "пр", "Четверг", "Четная неделя", "", "ссылка"));
+
+        lessons.add(new Lesson("10:00-11:20", "Оффлайн", "Системы ИИ", "лб", "Пятница", "Четная неделя", "2/628", ""));
+        lessons.add(new Lesson("11:30-12:50", "Онлайн", "Физика", "лк", "Пятница", "Четная неделя", "", "ссылка"));
+
+        lessons.add(new Lesson("10:00-11:20", "Оффлайн", "Системы ИИ", "лб", "Суббота", "Четная неделя", "2/628", ""));
+        lessons.add(new Lesson("11:30-12:50", "Онлайн", "Физика", "пр", "Суббота", "Четная неделя", "", "ссылка"));
+        lessons.add(new Lesson("11:30-12:50", "Онлайн", "Физика", "лк", "Суббота", "Четная неделя", "", "ссылка"));
+
+        // Получаем объект базы данных
+        SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+
+        // Очищаем таблицу
+        sqLiteDatabase.execSQL("DELETE FROM lessons");
+
+        // Вставляем новые данные
+        for (Lesson lesson : lessons) {
+            db.insertData(lesson);
+        }
     }
 }

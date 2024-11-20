@@ -44,7 +44,7 @@ public class ContentActivity extends AppCompatActivity {
     }
     public void setSpinner(Spinner spinner, List<String> spinnerItems, Consumer<String> onItemSelected) {
         // Создаем адаптер для Spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, spinnerItems);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, spinnerItems);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 

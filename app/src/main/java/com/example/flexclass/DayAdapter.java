@@ -1,7 +1,9 @@
 package com.example.flexclass;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,11 +21,13 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
 
     private Context context;
     private DaySchedule daySchedule;
+    private DbHelper db;
 
     // Конструктор для передачи контекста и данных
-    public DayAdapter(Context context, DaySchedule daySchedule) {
+    public DayAdapter(Context context, DaySchedule daySchedule, DbHelper db) {
         this.context = context;
         this.daySchedule = daySchedule;
+        this.db = db;
     }
 
     // Создание ViewHolder
@@ -92,6 +96,24 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
                 return true; // Возвращаем true, чтобы событие было обработано
             }
         });
+    }
+
+    // Удалить элемент
+    public void removeItem(int position) {
+        if (position >= 0 && position < getItemCount()) {
+            Lesson lesson = daySchedule.getLessons().get(position);
+            db.deleteData(lesson);
+            daySchedule.getLessons().remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
+    // Редактировать элемент
+    public void editItem(int position) {
+        Lesson lesson = daySchedule.getLessons().get(position);
+        Intent intent = new Intent(context, ContentActivity.class);
+        intent.putExtra("lesson", lesson);
+        context.startActivity(intent);
     }
 
     // Количество элементов

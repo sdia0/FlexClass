@@ -1,6 +1,8 @@
 package com.example.flexclass;
 
-public class Lesson {
+import java.io.Serializable;
+
+public class Lesson implements Serializable {
     int id;
     String time, format, title, type, day, week, aud, link;
     public Lesson(String time, String format, String title, String type, String day, String week) {
@@ -21,7 +23,20 @@ public class Lesson {
         this.aud = aud;
         this.link = link;
     }
-
+    public void setAudOrLink(String string) {
+        if (this.format.equals("Онлайн")) {
+            this.link = string;
+            this.aud = "";
+        }
+        else {
+            this.aud = string;
+            this.link = "";
+        }
+    }
+    public String getAudOrLink(String string) {
+        if (this.format.equals("Онлайн")) return this.link;
+        else return this.aud;
+    }
     public String getAud() {
         return aud;
     }

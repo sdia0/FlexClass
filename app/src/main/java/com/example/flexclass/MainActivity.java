@@ -3,6 +3,7 @@ package com.example.flexclass;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -18,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,7 +28,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    TextView day;
     ImageButton btnAdd;
     DbHelper db;
     @Override
@@ -50,12 +51,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        day = findViewById(R.id.tvDay);
-
-        List<String> days = new ArrayList<>(Arrays.asList("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"));
-
-        List<DaySchedule> weekSchedule = new ArrayList<>();
         db = new DbHelper(this);
+
+    }
+    public void setDayAdapter() {
+        List<String> days = new ArrayList<>(Arrays.asList("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"));
+        List<DaySchedule> weekSchedule = new ArrayList<>();
         //fillData();
         weekSchedule.add(new DaySchedule("Monday", db.getScheduleForDay(days.get(0))));
         weekSchedule.add(new DaySchedule("Tuesday", db.getScheduleForDay(days.get(1))));
@@ -72,43 +73,56 @@ public class MainActivity extends AppCompatActivity {
             TextView tvDay = dayView.findViewById(R.id.tvDay);
             RecyclerView recyclerView = dayView.findViewById(R.id.dayRecyclerView);
 
-            DayAdapter adapter = new DayAdapter(this, weekSchedule.get(i));
+            DayAdapter adapter = new DayAdapter(this, weekSchedule.get(i), db);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             recyclerView.setAdapter(adapter);
+            SwipeWithIconsCallback callback = new SwipeWithIconsCallback(adapter, this);
+            ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+            itemTouchHelper.attachToRecyclerView(recyclerView);
+
+            recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+                @Override
+                public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent e) {
+                    if (e.getAction() == MotionEvent.ACTION_UP) {
+                        // Проверяем, было ли нажатие на одну из иконок (удаление или редактирование)
+                        int childCount = recyclerView.getChildCount();
+                        for (int i = 0; i < childCount; i++) {
+                            View childView = recyclerView.getChildAt(i);
+                            RecyclerView.ViewHolder viewHolder = recyclerView.getChildViewHolder(childView);
+
+                            // Проверяем, попадает ли клик в одну из областей иконок
+                            if (callback.mDeleteIconBounds.contains((int) e.getX(), (int) e.getY())) {
+                                // Нажата иконка для удаления
+                                callback.onDeleteClicked(viewHolder.getAdapterPosition());
+                                return true; // Обрабатываем клик
+                            } else if (callback.mEditIconBounds.contains((int) e.getX(), (int) e.getY())) {
+                                // Нажата иконка для редактирования
+                                callback.onEditClicked(viewHolder.getAdapterPosition());
+                                return true; // Обрабатываем клик
+                            }
+                        }
+                    }
+                    return false;
+                }
+
+                @Override
+                public void onTouchEvent(RecyclerView recyclerView, MotionEvent e) {
+                    // Здесь можно ничего не делать
+                }
+
+                @Override
+                public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+                    // Ничего не делаем
+                }
+            });
+
             adapter.updateDayTitle(tvDay, days.get(i));
         }
     }
-
-    // Пример метода для получения списка уроков для дня
-    private List<Lesson> getLessonsForDay(String day) {
-        // Здесь вы можете получить данные для каждого дня недели
-        List<Lesson> lessons = new ArrayList<>();
-        // Заполняем список уроков для дня
-        // Например:
-        switch(day) {
-            case "Понедельник":
-                lessons.add(new Lesson("10:00-11:20", "Оффлайн", "Системы ИИ", "лб", day, "Четная неделя", "2/628", ""));
-                lessons.add(new Lesson("11:30-12:50", "Онлайн", "Физика", "пр", day, "Четная неделя", "", "ссылка"));
-                break;
-            case "Вторник":
-                lessons.add(new Lesson("13:00-14:20", "Онлайн", "УП", "лб", day, "Четная неделя"));
-                lessons.add(new Lesson("11:30-12:50", "Онлайн", "ТРПО", "пр", day, "Четная неделя"));
-                break;
-            case "Четверг":
-                lessons.add(new Lesson("15:00-16:20", "Оффлайн", "КС", "пр", day, "Четная неделя"));
-                lessons.add(new Lesson("16:30-17:50", "Онлайн", "Физика", "пр", day, "Четная неделя"));
-                break;
-            case "Пятница":
-                lessons.add(new Lesson("10:00-11:20", "Оффлайн", "Системы ИИ", "лб", day, "Четная неделя"));
-                lessons.add(new Lesson("11:30-12:50", "Онлайн", "Физика", "лк", day, "Четная неделя"));
-                break;
-            case "Суббота":
-                lessons.add(new Lesson("10:00-11:20", "Оффлайн", "Системы ИИ", "лб", day, "Четная неделя"));
-                lessons.add(new Lesson("11:30-12:50", "Онлайн", "Физика", "пр", day, "Четная неделя"));
-                lessons.add(new Lesson("11:30-12:50", "Онлайн", "Физика", "лк", day, "Четная неделя"));
-                break;
-        }
-        return lessons;
+    @Override
+    protected void onStart() {
+        super.onStart();
+        setDayAdapter();
     }
     void fillData() {
         String packageName = getPackageName(); // Получаем имя пакета приложения

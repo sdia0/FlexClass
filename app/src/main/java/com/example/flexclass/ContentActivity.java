@@ -1,11 +1,14 @@
 package com.example.flexclass;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,7 +22,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ContentActivity extends AppCompatActivity {
-    EditText startTime, endTime, linkOrAud, subject;
+    EditText startTime, endTime, etLinkOrAud, etSubject;
+    ImageButton btnInsert, btnDelete;
     Spinner spFormat, spType, spDay, spWeek;
     DbHelper db;
     String selectedFormat, selectedType, selectedDay, selectedWeek;
@@ -41,6 +45,59 @@ public class ContentActivity extends AppCompatActivity {
         setSpinner(spDay, Arrays.asList("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"), selected -> selectedDay = selected);
         setSpinner(spWeek, Arrays.asList("Четная неделя", "Нечетная неделя"), selected -> selectedWeek = selected);
 
+        startTime = findViewById(R.id.startTime);
+        endTime = findViewById(R.id.endTime);
+        etLinkOrAud = findViewById(R.id.etLinkOrAud);
+        etSubject = findViewById(R.id.etSubject);
+
+        btnInsert = findViewById(R.id.btnOk);
+        btnDelete = findViewById(R.id.btnDelete);
+
+        Intent intent = getIntent();
+        Lesson lesson = (Lesson) intent.getSerializableExtra("lesson");
+
+        if (lesson != null){
+            startTime.setText(lesson.getTimeStart());
+            endTime.setText(lesson.getTimeEnd());
+            selectedFormat = lesson.getFormat();
+            etLinkOrAud.setText(lesson.getAudOrLink(lesson.getFormat()));
+            selectedDay = lesson.getDay();
+            selectedWeek = lesson.getWeek();
+            selectedType = lesson.getType();
+        }
+
+        btnInsert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String time = startTime.getText().toString() + "-" + endTime.getText().toString();
+                String subject = etSubject.getText().toString();
+                String linkOrAud = etLinkOrAud.getText().toString();
+                if (time.isEmpty() || subject.isEmpty() || linkOrAud.isEmpty()) {
+                    Toast.makeText(ContentActivity.this, "Заполните все поля!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Lesson lesson = new Lesson(
+                    time,
+                    selectedFormat,
+                    subject,
+                    selectedType,
+                    selectedDay,
+                    selectedWeek
+                );
+                lesson.setAudOrLink(linkOrAud);
+                boolean result = db.insertData(lesson);
+                if (result)
+                {   Toast.makeText(getApplicationContext(),
+                        "Data inserted",
+                        Toast.LENGTH_SHORT);
+                    finish();
+                }
+                else
+                    Toast.makeText(getApplicationContext(),
+                            "Data not inserted",
+                            Toast.LENGTH_SHORT);
+            }
+        });
     }
     public void setSpinner(Spinner spinner, List<String> spinnerItems, Consumer<String> onItemSelected) {
         // Создаем адаптер для Spinner

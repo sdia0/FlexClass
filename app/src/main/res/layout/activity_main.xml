@@ -13,10 +13,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/dark_blue"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        >
 
         <TextView
-            android:id="@+id/spWeek"
+            android:id="@+id/tvWeek"
             android:text="Четная неделя"
             android:textSize="24sp"
             android:textColor="@color/white"
@@ -49,6 +50,144 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/editMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/round_item"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginHorizontal="10dp"
+            android:visibility="gone"
+            >
+
+            <ImageView
+                android:id="@+id/btnExit"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/exit"
+                android:layout_gravity="end"
+                app:tint="@color/white"
+                android:layout_marginTop="15dp"
+                />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="8dp"
+                android:weightSum="8">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="от"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <EditText
+                    android:id="@+id/startTime"
+                    style="@style/CustomEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:paddingVertical="8dp"
+                    android:paddingStart="15dp"
+                    android:textColorHint="@color/white"
+                    android:textSize="24sp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="до"
+                    android:textColor="@color/white"
+                    android:textSize="20sp" />
+
+                <EditText
+                    android:id="@+id/endTime"
+                    style="@style/CustomEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="3"
+                    android:paddingVertical="8dp"
+                    android:paddingStart="15dp"
+                    android:textColorHint="@color/white"
+                    android:textSize="24sp" />
+
+            </LinearLayout>
+
+            <Spinner
+                android:id="@+id/spFormat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:paddingVertical="8dp" />
+
+            <EditText
+                android:id="@+id/etLinkOrAud"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:hint="Аудитория/ссылка"
+                android:paddingVertical="8dp"
+                android:paddingStart="15dp"
+                android:textColorHint="@color/white"
+                android:textSize="24sp" />
+
+            <EditText
+                android:id="@+id/etSubject"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:hint="Название предмета"
+                android:paddingVertical="8dp"
+                android:paddingStart="15dp"
+                android:textColorHint="@color/white"
+                android:textSize="24sp" />
+
+            <Spinner
+                android:id="@+id/spType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="15dp"
+                android:paddingVertical="8dp" />
+
+            <Spinner
+                android:id="@+id/spDay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="15dp"
+                android:paddingVertical="8dp" />
+
+            <Spinner
+                android:id="@+id/spWeek"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="15dp"
+                android:paddingVertical="8dp" />
+
+            <Button
+                android:id="@+id/btnOk"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                android:backgroundTint="@color/blue"
+                android:text="OK"
+                android:textColor="@color/white"
+                android:textSize="20dp" />
+
+        </LinearLayout>
 
         <include
             android:id="@+id/mondayLayout"

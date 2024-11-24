@@ -134,10 +134,32 @@ public class DbHelper extends SQLiteOpenHelper {
         return lessons;
     }
 
-    public List<Lesson> getScheduleForDay(String day) {
+    public Lesson getData(int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("select * from lessons where _id=?", new String[]{id + ""});
+        if (cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                Lesson lesson = new Lesson(
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getString(3),
+                        cursor.getString(4),
+                        cursor.getString(5),
+                        cursor.getString(6),
+                        cursor.getString(7),
+                        cursor.getString(8)
+                );
+                lesson.setId(cursor.getInt(0));
+                return lesson;
+            }
+        }
+        return null;
+    }
+
+    public List<Lesson> getScheduleForDay(String week, String day) {
         List<Lesson> lessons = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM lessons WHERE day=?", new String[]{day});
+        Cursor cursor = db.rawQuery("SELECT * FROM lessons WHERE day = ? AND (week = ? OR week = 'Каждую неделю')", new String[]{day, week});
 
         if (cursor.moveToFirst()) {
             do {
@@ -174,6 +196,11 @@ public class DbHelper extends SQLiteOpenHelper {
         content.put("link", lesson.getLink());
 
         long result = db.insert("lessons", null, content);
+        Cursor cursor = db.rawQuery("SELECT _id, day, title FROM lessons", null);
+        while (cursor.moveToNext()) {
+            Log.d("Database", "_id: " + cursor.getInt(0) + ", day: " + cursor.getString(1) + ", title: " + cursor.getString(2));
+        }
+        cursor.close();
         return result == -1 ? false : true;
     }
 

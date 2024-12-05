@@ -28,8 +28,11 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
 
@@ -45,7 +48,6 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
         this.activity = activity;
     }
 
-    // Создание ViewHolder
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -53,21 +55,28 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
         return new MyViewHolder(view);
     }
 
-    // Привязка данных к ViewHolder
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         Lesson lesson = daySchedule.getLessons().get(position);
 
-        holder.tvTime.setText(lesson.getTimeStart());
-        holder.tvSubject.setText(lesson.getTitle());
-        holder.tvType.setText(lesson.getType());
-
-        // Настраиваем круг с цветом
+        // Установка цвета в кружок
         GradientDrawable drawable = new GradientDrawable();
         drawable.setShape(GradientDrawable.OVAL);
         drawable.setColor(getColor(lesson.getFormat()));
         holder.vFormat.setBackground(drawable);
 
+        // Подсказка для цвета
+        holder.vFormat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, lesson.getFormat(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Установка данных в окне редактирования
+        holder.tvTime.setText(lesson.getTimeStart());
+        holder.tvSubject.setText(lesson.getTitle());
+        holder.tvType.setText(lesson.getType());
         holder.startTime.setText(lesson.getTimeStart());
         holder.endTime.setText(lesson.getTimeEnd());
         holder.selectedFormat = lesson.getFormat();
@@ -77,10 +86,8 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
         holder.selectedWeek = lesson.getWeek();
         holder.selectedType = lesson.getType();
 
-        holder.setSpinner(holder.spFormat, Arrays.asList("Онлайн", "Оффлайн"), holder.selectedFormat, selected -> holder.selectedFormat = selected);
-        holder.setSpinner(holder.spType, Arrays.asList("лб", "лк", "пр"), holder.selectedType, selected -> holder.selectedType = selected);
-        holder.setSpinner(holder.spDay, Arrays.asList("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"), holder.selectedDay, selected -> holder.selectedDay = selected);
-        holder.setSpinner(holder.spWeek, Arrays.asList("Каждую неделю", "Числитель", "Знаменатель"), holder.selectedWeek, selected -> holder.selectedWeek = selected);
+        // Установка спиннеров
+        holder.setSpinners();
     }
 
     // Удалить элемент
@@ -119,9 +126,6 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
         tvDay.setVisibility(View.VISIBLE);
         tvDay.setText(day);
     }
-    public void makeToast(String message) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-    }
 
     // ViewHolder для хранения View
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -131,12 +135,12 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
         EditText startTime, endTime, etLinkOrAud, etSubject;
         Spinner spFormat, spType, spDay, spWeek;
         String selectedFormat, selectedType, selectedDay, selectedWeek;
-        Button ok;
+        Button ok, delete;
         ImageView exit;
-        private GestureDetector gestureDetector;
         @SuppressLint("ClickableViewAccessibility")
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
+            // Инициализация
             tvTime = itemView.findViewById(R.id.tvTime);
             tvSubject = itemView.findViewById(R.id.tvSubject);
             tvType = itemView.findViewById(R.id.tvType);
@@ -156,24 +160,13 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
             editMod = itemView.findViewById(R.id.editMode);
 
             ok = itemView.findViewById(R.id.btnOk);
+            delete = itemView.findViewById(R.id.btnDelete);
             exit = itemView.findViewById(R.id.btnExit);
 
-            // Инициализируем GestureDetector для двойного нажатия
-            gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-                    // Обрабатываем двойное нажатие
-                    defaultMod.setVisibility(View.GONE);
-                    editMod.setVisibility(View.VISIBLE);
-                    return true;
-                }
-            });
-
-            // Устанавливаем обработчик долгого нажатия
+            // Переход по ссылке по долгому нажатию на элемент
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    Toast.makeText(context, "Долгое нажатие", Toast.LENGTH_SHORT).show();
                     Lesson lesson = daySchedule.getLessons().get(getAdapterPosition());
                     if (lesson.getFormat().equals("Онлайн")) {
                         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(lesson.getLink()));
@@ -186,15 +179,16 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
                 }
             });
 
-            // Устанавливаем обработчик касания для детектирования двойного нажатия
-            itemView.setOnTouchListener(new View.OnTouchListener() {
+            // Раскрыть окно редактирования по нажатию на элемент
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    gestureDetector.onTouchEvent(event);
-                    return false; // Возвращаем false, чтобы другие обработчики могли сработать
+                public void onClick(View v) {
+                    defaultMod.setVisibility(View.GONE);
+                    editMod.setVisibility(View.VISIBLE);
                 }
             });
 
+            // Кнопка ok для ОБНОВЛЕНИЯ данных
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -209,8 +203,19 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
                         return;
                     }
 
+                    // Валидация данных
+                    String sTime = startTime.getText().toString();
+                    String eTime = endTime.getText().toString();
+                    Pattern pattern = Pattern.compile("^(?:[01]\\d|2[0-3]):([0-5]\\d)$");
+                    Matcher matcher1 = pattern.matcher(sTime);
+                    Matcher matcher2 = pattern.matcher(eTime);
+                    if (!matcher1.matches() || !matcher2.matches()) {
+                        Toast.makeText(context, "Заполните время в формате чч:мм", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
                     // Создаем новый объект урока с обновленными данными
-                    Lesson newLesson = new Lesson(
+                    Lesson updatedLesson = new Lesson(
                             time,
                             selectedFormat,
                             subject,
@@ -218,11 +223,11 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
                             selectedDay,
                             selectedWeek
                     );
-                    newLesson.setAudOrLink(linkOrAud);
-                    newLesson.setId(daySchedule.getLessons().get(getAdapterPosition()).getId());
+                    updatedLesson.setAudOrLink(linkOrAud);
+                    updatedLesson.setId(daySchedule.getLessons().get(getAdapterPosition()).getId());
                     try {
                         // Обновляем данные в базе
-                        Boolean result = db.updateData(newLesson);
+                        Boolean result = db.updateData(updatedLesson);
 
                         // Проверяем, удалось ли обновить данные
                         if (result) {
@@ -232,8 +237,9 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
                             int position = getAdapterPosition(); // Получаем позицию текущего элемента в списке
                             if (position != RecyclerView.NO_POSITION) {
                                 // Обновляем данные в адаптере
-                                daySchedule.getLessons().set(position, newLesson);
-                                notifyItemChanged(position); // Уведомляем адаптер, что элемент обновлен
+                                daySchedule.getLessons().set(position, updatedLesson);
+                                daySchedule.getLessons().sort(Comparator.comparing(Lesson::getTimeStart));
+                                notifyDataSetChanged(); // Уведомляем адаптер, что элемент обновлен
                             }
                         } else {
                             Toast.makeText(context, "Cannot update data", Toast.LENGTH_SHORT).show();
@@ -247,8 +253,15 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
                     // Возвращаемся в режим отображения
                     defaultMod.setVisibility(View.VISIBLE);
                     editMod.setVisibility(View.GONE);
+                    setDefaultSpinners();
+                    startTime.setText("");
+                    endTime.setText("");
+                    etLinkOrAud.setText("");
+                    etSubject.setText("");
                 }
             });
+
+            // Кнопка отмены редактирования (скрывает окно редактирования)
             exit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -256,6 +269,31 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.MyViewHolder> {
                     editMod.setVisibility(View.GONE);
                 }
             });
+
+            // Кнопка удаления данных
+            delete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    removeItem(getAdapterPosition());
+                }
+            });
+        }
+        private void setSpinners() {
+            setSpinner(spFormat, Arrays.asList("Онлайн", "Оффлайн"), selectedFormat, selected -> {
+                selectedFormat = selected;
+                if (selected.equals("Онлайн")) etLinkOrAud.setHint("Ссылка");
+                else etLinkOrAud.setHint("Аудитория");
+            });
+            setSpinner(spType, Arrays.asList("лб", "лк", "пр"), selectedType, selected -> selectedType = selected);
+            setSpinner(spDay, Arrays.asList("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"), selectedDay, selected -> selectedDay = selected);
+            setSpinner(spWeek, Arrays.asList("Каждую неделю", "Числитель", "Знаменатель"), selectedWeek, selected -> selectedWeek = selected);
+        }
+        private void setDefaultSpinners() {
+            selectedFormat = "Онлайн";
+            selectedType = "лб";
+            selectedDay = "Понедельник";
+            selectedWeek = "Каждую неделю";
+            setSpinners();
         }
         public void setSpinner(Spinner spinner, List<String> spinnerItems, String selected, Consumer<String> onItemSelected) {
             // Создаем адаптер для Spinner

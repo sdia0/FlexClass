@@ -55,19 +55,24 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
-    ImageButton btnAdd;
     DbHelper db;
-    LinearLayout editMod;
-    EditText startTime, endTime, etLinkOrAud, etSubject;
-    Spinner spFormat, spType, spDay, spWeek;
-    String selectedFormat, selectedType, selectedDay, selectedWeek;
-    Button ok;
-    ImageView exit;
     TextView week;
-    public static String NOTIFICATION_CHANNEL_ID = "1001";
-    public static String default_notification_id = "default";
+    List<String> times = new ArrayList<>(Arrays.asList(
+            "10:00-11:20",
+            "11:30-12:50",
+            "13:00-14:20",
+            "15:00-16:20",
+            "16:30-17:50",
+            "18:00-19:20"
+    ));
+    List<String> ruDays = new ArrayList<>(Arrays.asList("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"));
+    List<String> engDays = new ArrayList<>(Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"));
+    List<DaySchedule> weekSchedule = new ArrayList<>();
+    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,137 +85,194 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        spFormat = findViewById(R.id.spFormat);
-        spType = findViewById(R.id.spType);
-        spDay = findViewById(R.id.spDay);
-        spWeek = findViewById(R.id.spWeek);
-
-        startTime = findViewById(R.id.startTime);
-        endTime = findViewById(R.id.endTime);
-        etLinkOrAud = findViewById(R.id.etLinkOrAud);
-        etSubject = findViewById(R.id.etSubject);
-
-        editMod = findViewById(R.id.editMode);
-
-        ok = findViewById(R.id.btnOk);
-        exit = findViewById(R.id.btnExit);
-
-        setSpinner(spFormat, Arrays.asList("Онлайн", "Оффлайн"), selectedFormat, selected -> selectedFormat = selected);
-        setSpinner(spType, Arrays.asList("лб", "лк", "пр"), selectedType, selected -> selectedType = selected);
-        setSpinner(spDay, Arrays.asList("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"), selectedDay, selected -> selectedDay = selected);
-        setSpinner(spWeek, Arrays.asList("Каждую неделю", "Числитель", "Знаменатель"), selectedWeek, selected -> selectedWeek = selected);
-
-        btnAdd = findViewById(R.id.btnAdd);
-        btnAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                editMod.setVisibility(View.VISIBLE);
-            }
-        });
-
         db = new DbHelper(this);
 
-        ok.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String time = startTime.getText().toString() + "-" + endTime.getText().toString();
-                String subject = etSubject.getText().toString();
-                String linkOrAud = etLinkOrAud.getText().toString();
-                if (startTime.getText().toString().isEmpty() || endTime.getText().toString().isEmpty() || subject.isEmpty() || linkOrAud.isEmpty()) {
-                    Toast.makeText(MainActivity.this, "Заполните все поля!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Lesson newLesson = new Lesson(
-                        time,
-                        selectedFormat,
-                        subject,
-                        selectedType,
-                        selectedDay,
-                        selectedWeek
-                );
-                newLesson.setAudOrLink(linkOrAud);
-                boolean result = db.insertData(newLesson);
-                if (result) {
-                    Toast.makeText(getApplicationContext(),
-                            "Data inserted",
-                            Toast.LENGTH_SHORT);
-                } else
-                    Toast.makeText(getApplicationContext(),
-                            "Data not inserted",
-                            Toast.LENGTH_SHORT);
-                setDayAdapter();
-                editMod.setVisibility(View.GONE);
-                selectedFormat = "Онлайн";
-                selectedType = "лб";
-                selectedDay = "Понедельник";
-                selectedWeek = "Каждую неделю";
-                setSpinner(spFormat, Arrays.asList("Онлайн", "Оффлайн"), selectedFormat, selected -> selectedFormat = selected);
-                setSpinner(spType, Arrays.asList("лб", "лк", "пр"), selectedType, selected -> selectedType = selected);
-                setSpinner(spDay, Arrays.asList("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"), selectedDay, selected -> selectedDay = selected);
-                setSpinner(spWeek, Arrays.asList("Каждую неделю", "Числитель", "Знаменатель"), selectedWeek, selected -> selectedWeek = selected);
-                startTime.setText("");
-                endTime.setText("");
-                etLinkOrAud.setText("");
-                etSubject.setText("");
-            }
-        });
-
-        exit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                editMod.setVisibility(View.GONE);
-            }
-        });
-
-        // Получаем текущую дату
+        // Определение текущей недели
         Calendar currentCalendar = Calendar.getInstance();
-        Date currentDate = currentCalendar.getTime();
-
-        // Определяем начало учебного года (1 сентября)
         Calendar startOfYearCalendar = Calendar.getInstance();
         startOfYearCalendar.set(currentCalendar.get(Calendar.YEAR), Calendar.SEPTEMBER, 1);
-
-        // Получаем номер недели для обеих дат
         int weekOfYearStart = startOfYearCalendar.get(Calendar.WEEK_OF_YEAR);
         int weekOfYearCurrent = currentCalendar.get(Calendar.WEEK_OF_YEAR);
-
-        // Рассчитываем текущую учебную неделю
         int schoolWeek = weekOfYearCurrent - weekOfYearStart + 1;
-
-        // Устанавливаем номер учебной недели в TextView
         week = findViewById(R.id.tvWeek);
         if (schoolWeek % 2 != 0) week.setText("Знаменатель");
         else week.setText("Числитель");
 
+        // Посмотреть расписание для другой недели
         week.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (week.getText().toString().equals("Знаменатель")) week.setText("Числитель");
                 else week.setText("Знаменатель");
-                setDayAdapter();
             }
         });
-        // Запрос разрешения на отправку уведомлений для Android 13 (API 33) и выше
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, "android.permission.POST_NOTIFICATIONS")
-                    != PackageManager.PERMISSION_GRANTED) {
-                // Запрашиваем разрешение
-                ActivityCompat.requestPermissions(this,
-                        new String[]{"android.permission.POST_NOTIFICATIONS"}, 1);
-            }
-        }
-        createNotificationChannel();
-    }
-    private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    "LESSON_CHANNEL",
-                    "Уведомления об уроках",
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            channel.setDescription("Уведомления о начале уроков");
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+
+        //Установка адаптеров
+
+        weekSchedule.add(new DaySchedule("Monday", db.getScheduleForDay(week.getText().toString(), ruDays.get(0))));
+        weekSchedule.add(new DaySchedule("Tuesday", db.getScheduleForDay(week.getText().toString(), ruDays.get(1))));
+        weekSchedule.add(new DaySchedule("Wednesday", db.getScheduleForDay(week.getText().toString(), ruDays.get(2))));
+        weekSchedule.add(new DaySchedule("Thursday", db.getScheduleForDay(week.getText().toString(), ruDays.get(3))));
+        weekSchedule.add(new DaySchedule("Friday", db.getScheduleForDay(week.getText().toString(), ruDays.get(4))));
+        weekSchedule.add(new DaySchedule("Saturday", db.getScheduleForDay(week.getText().toString(), ruDays.get(5))));
+
+        // Привязка каждого адаптера к своим View
+        for (int i = 0; i < weekSchedule.size(); i++) {
+            // Нахождение RecyclerView по id
+            int resId = getResources().getIdentifier(weekSchedule.get(i).getDayName().toLowerCase() + "Layout", "id", getPackageName());
+
+            // Инициализация всех View
+            View dayView = findViewById(resId);
+            TextView tvDay = dayView.findViewById(R.id.tvDay);
+            Button add = dayView.findViewById(R.id.addLessonByDay);
+
+            Spinner spWeek = dayView.findViewById(R.id.spWeek_days);
+            Spinner spTime = dayView.findViewById(R.id.spTime_days);
+
+            EditText etLinkOrAud = dayView.findViewById(R.id.etLinkOrAud_days);
+            EditText etSubject = dayView.findViewById(R.id.etSubject_days);
+
+            LinearLayout editMod = dayView.findViewById(R.id.editMode_days);
+            Button ok = dayView.findViewById(R.id.btnOk_days);
+            ImageView exit = dayView.findViewById(R.id.btnExit_days);
+
+            Button bOnline = dayView.findViewById(R.id.bOnline_days);
+            Button bOffline = dayView.findViewById(R.id.bOffline_days);
+            Button bLb = dayView.findViewById(R.id.bLb_days);
+            Button bLk = dayView.findViewById(R.id.bLk_days);
+            Button bPr = dayView.findViewById(R.id.bPr_days);
+
+            // Установка значений по умолчанию
+            String[] selectedFormat = {"Онлайн"};
+            bOnline.setBackgroundColor(R.color.white);
+            bOffline.setBackgroundColor(R.color.blue);
+            String[] selectedType = {"лб"};
+            bLb.setBackgroundColor(R.color.white);
+            bLk.setBackgroundColor(R.color.blue);
+            bPr.setBackgroundColor(R.color.blue);
+            final String[] selectedTime = {times.get(0)};
+            final String[] selectedWeek = {"Каждую неделю"};
+            final String[] selectedDay = {"Понедельник"};
+
+            // Установка спиннеров
+            setSpinner(spTime, times, selectedTime[0], selected -> selectedTime[0] = selected);
+            setSpinner(spWeek, Arrays.asList("Каждую неделю", "Числитель", "Знаменатель"), selectedWeek[0], selected -> selectedWeek[0] = selected);
+
+            // Кнопка ДОБАВИТЬ, открывающая окно ввода данных
+            int finalI = i;
+            add.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    editMod.setVisibility(View.VISIBLE);
+                    selectedDay[0] = ruDays.get(finalI);
+                }
+            });
+
+            bOnline.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    selectedFormat[0] = "Онлайн";
+                    bOnline.setBackgroundColor(ContextCompat.getColor(v.getContext(), R.color.white)); // Установить белый цвет
+                    bOffline.setBackgroundColor(ContextCompat.getColor(v.getContext(), R.color.blue)); // Установить синий цвет
+                }
+            });
+
+            bOffline.setOnClickListener(new View.OnClickListener() {
+                @SuppressLint("ResourceAsColor")
+                @Override
+                public void onClick(View v) {
+                    selectedFormat[0] = "Оффлайн";
+                    bOffline.setBackgroundColor(R.color.white);
+                    bOnline.setBackgroundColor(R.color.blue);
+                }
+            });
+
+            bLb.setOnClickListener(new View.OnClickListener() {
+                @SuppressLint("ResourceAsColor")
+                @Override
+                public void onClick(View v) {
+                    selectedType[0] = "лб";
+                    bLb.setBackgroundColor(R.color.white);
+                    bLk.setBackgroundColor(R.color.blue);
+                    bPr.setBackgroundColor(R.color.blue);
+                }
+            });
+
+            bLk.setOnClickListener(new View.OnClickListener() {
+                @SuppressLint("ResourceAsColor")
+                @Override
+                public void onClick(View v) {
+                    selectedType[0] = "лк";
+                    bLb.setBackgroundColor(R.color.blue);
+                    bLk.setBackgroundColor(R.color.white);
+                    bPr.setBackgroundColor(R.color.blue);
+                }
+            });
+
+            bPr.setOnClickListener(new View.OnClickListener() {
+                @SuppressLint("ResourceAsColor")
+                @Override
+                public void onClick(View v) {
+                    selectedType[0] = "пр";
+                    bLb.setBackgroundColor(R.color.blue);
+                    bLk.setBackgroundColor(R.color.blue);
+                    bPr.setBackgroundColor(R.color.white);
+                }
+            });
+
+            // Кнопка ok для ДОБАВЛЕНИЯ данных
+            ok.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String subject = etSubject.getText().toString();
+                    String linkOrAud = etLinkOrAud.getText().toString();
+
+                    // Если хоть одно поле пустое
+
+
+                    // Добавление новой записи
+                    Lesson newLesson = new Lesson(
+                            selectedTime[0],
+                            selectedFormat[0],
+                            subject,
+                            selectedType[0],
+                            selectedDay[0],
+                            selectedWeek[0]
+                    );
+                    newLesson.setAudOrLink(linkOrAud);
+                    boolean result = db.insertData(newLesson);
+                    if (result) {
+                        Toast.makeText(getApplicationContext(),
+                                "Data inserted",
+                                Toast.LENGTH_SHORT);
+                    } else
+                        Toast.makeText(getApplicationContext(),
+                                "Data not inserted",
+                                Toast.LENGTH_SHORT);
+
+                    // Установка данных на адаптер
+                    setDayAdapter(selectedDay[0]);
+                    editMod.setVisibility(View.GONE);
+                    etLinkOrAud.setText("");
+                    etSubject.setText("");
+                }
+            });
+
+            // Кнопка отмены добавления данных (скрывает окно добавления)
+            exit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    editMod.setVisibility(View.GONE);
+                    etLinkOrAud.setText("");
+                    etSubject.setText("");
+                }
+            });
+            RecyclerView recyclerView = dayView.findViewById(R.id.dayRecyclerView);
+            weekSchedule.get(i).getLessons().sort(Comparator.comparing(Lesson::getTimeStart));
+            DayAdapter adapter = new DayAdapter(this, weekSchedule.get(i), db, this);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            recyclerView.setAdapter(adapter);
+            adapter.updateDayTitle(tvDay, ruDays.get(i));
         }
     }
     public void setSpinner(Spinner spinner, List<String> spinnerItems, String selected, Consumer<String> onItemSelected) {
@@ -236,113 +298,67 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    @SuppressLint("ScheduleExactAlarm")
-    public void setNotificationAtTime(String time, Notification notification) {
-        // Преобразуем строку времени "чч:мм" в миллисекунды
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-        Calendar calendar = Calendar.getInstance();
+    public void setDayAdapter(String day) {
+        // Найти индекс дня в расписании
+        int index = -1;
+        for (int i = 0; i < weekSchedule.size(); i++) {
+            if (weekSchedule.get(i).getDayName().equals(day)) {
+                index = i;  // Сохраняем индекс найденного дня
+                break;
+            }
+        }
 
-        try {
-            Date parsedTime = dateFormat.parse(time); // Преобразуем строку в Date
-            calendar.setTime(parsedTime); // Устанавливаем время в календарь
-
-            // Получаем текущее время и устанавливаем время для уведомления
-            long targetTimeInMillis = calendar.getTimeInMillis();
-
-            // Рассчитываем время для уведомления за 10 секунд до целевого времени
-            long notificationTime = targetTimeInMillis; // 10 секунд до
-
-            // Создаем PendingIntent для уведомления
-            Intent notificationIntent = new Intent(this, MyNotificationPublisher.class);
-            notificationIntent.putExtra(MyNotificationPublisher.NOTIFICATIONID, 1);
-            notificationIntent.putExtra(MyNotificationPublisher.NOTIFICATION, notification);
-
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, notificationIntent, PendingIntent.FLAG_MUTABLE);
-
-            // Устанавливаем AlarmManager, чтобы уведомление появилось в нужное время
-            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-            assert alarmManager != null;
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, notificationTime, pendingIntent);
-        } catch (ParseException e) {
-            e.printStackTrace();
+        // Если день найден, заменяем объект
+        if (index != -1) {
+            // Получаем новый объект DaySchedule для данного дня
+            DaySchedule newSchedule = new DaySchedule(engDays.get(index), db.getScheduleForDay(week.getText().toString(), ruDays.get(index)));
+            // Заменяем старый объект новым в списке
+            weekSchedule.set(index, newSchedule);
+            // Установка адаптера
+            int resId = getResources().getIdentifier(weekSchedule.get(index).getDayName().toLowerCase() + "Layout", "id", getPackageName());
+            View dayView = findViewById(resId);
+            TextView tvDay = dayView.findViewById(R.id.tvDay);
+            RecyclerView recyclerView = dayView.findViewById(R.id.dayRecyclerView);
+            weekSchedule.get(index).getLessons().sort(Comparator.comparing(Lesson::getTimeStart));
+            DayAdapter adapter = new DayAdapter(this, weekSchedule.get(index), db, this);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            recyclerView.setAdapter(adapter);
+            adapter.updateDayTitle(tvDay, ruDays.get(index));
         }
     }
-
-    private Notification getNotification(String content) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, default_notification_id);
-        builder.setContentTitle("Notification");
-        builder.setContentText(content);
-        builder.setSmallIcon(R.drawable.ic_launcher_foreground);
-        builder.setAutoCancel(true);
-        builder.setChannelId(NOTIFICATION_CHANNEL_ID);
-        return builder.build();
-    }
-    public void setDayAdapter() {
-        List<String> days = new ArrayList<>(Arrays.asList("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"));
-        List<DaySchedule> weekSchedule = new ArrayList<>();
+    /*public void setDayAdapters() {
         //fillData();
-        weekSchedule.add(new DaySchedule("Monday", db.getScheduleForDay(week.getText().toString(), days.get(0))));
-        weekSchedule.add(new DaySchedule("Tuesday", db.getScheduleForDay(week.getText().toString(), days.get(1))));
-        weekSchedule.add(new DaySchedule("Wednesday", db.getScheduleForDay(week.getText().toString(), days.get(2))));
-        weekSchedule.add(new DaySchedule("Thursday", db.getScheduleForDay(week.getText().toString(), days.get(3))));
-        weekSchedule.add(new DaySchedule("Friday", db.getScheduleForDay(week.getText().toString(), days.get(4))));
-        weekSchedule.add(new DaySchedule("Saturday", db.getScheduleForDay(week.getText().toString(), days.get(5))));
+        weekSchedule.add(new DaySchedule("Monday", db.getScheduleForDay(week.getText().toString(), ruDays.get(0))));
+        weekSchedule.add(new DaySchedule("Tuesday", db.getScheduleForDay(week.getText().toString(), ruDays.get(1))));
+        weekSchedule.add(new DaySchedule("Wednesday", db.getScheduleForDay(week.getText().toString(), ruDays.get(2))));
+        weekSchedule.add(new DaySchedule("Thursday", db.getScheduleForDay(week.getText().toString(), ruDays.get(3))));
+        weekSchedule.add(new DaySchedule("Friday", db.getScheduleForDay(week.getText().toString(), ruDays.get(4))));
+        weekSchedule.add(new DaySchedule("Saturday", db.getScheduleForDay(week.getText().toString(), ruDays.get(5))));
 
         // Привязка каждого адаптера к своим View
         for (int i = 0; i < weekSchedule.size(); i++) {
             int resId = getResources().getIdentifier(weekSchedule.get(i).getDayName().toLowerCase() + "Layout", "id", getPackageName());
             View dayView = findViewById(resId);
             TextView tvDay = dayView.findViewById(R.id.tvDay);
+            Button add = dayView.findViewById(R.id.addLessonByDay);
+            int finalI = i;
+            add.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    editMod.setVisibility(View.VISIBLE);
+                    selectedWeek = "Каждую неделю";
+                    selectedDay = ruDays.get(finalI);
+                    setSpinners();
+                }
+            });
             RecyclerView recyclerView = dayView.findViewById(R.id.dayRecyclerView);
             weekSchedule.get(i).getLessons().sort(Comparator.comparing(Lesson::getTimeStart));
             DayAdapter adapter = new DayAdapter(this, weekSchedule.get(i), db, this);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             recyclerView.setAdapter(adapter);
-            // Настройка ItemTouchHelper
-            ItemTouchHelper.Callback callback = new ItemTouchHelper.Callback() {
-                @Override
-                public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-                    // Определяем разрешенные направления смахивания
-                    int swipeFlags = ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
-                    return makeMovementFlags(0, swipeFlags);
-                }
-
-                @Override
-                public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                    return false; // Мы не обрабатываем перемещение элементов
-                }
-
-                @Override
-                public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                    // Удаляем элемент при смахивании
-                    int position = viewHolder.getAdapterPosition();
-                    adapter.removeItem(position); // Удаление элемента из адаптера
-                }
-
-                @Override
-                public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
-                    super.onSelectedChanged(viewHolder, actionState);
-                    // Можно добавить визуальные изменения для выделенного элемента, если нужно
-                }
-
-                @Override
-                public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-                    super.clearView(recyclerView, viewHolder);
-                    // Можно добавить визуальные изменения для завершенного смахивания
-                }
-            };
-
-            // Настройка ItemTouchHelper
-            ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
-            itemTouchHelper.attachToRecyclerView(recyclerView);
-            adapter.updateDayTitle(tvDay, days.get(i));
+            adapter.updateDayTitle(tvDay, ruDays.get(i));
         }
-    }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        setDayAdapter();
-    }
+    }*/
     void fillData() {
         // Данные для вставки
         List<Lesson> lessons = new ArrayList<>();

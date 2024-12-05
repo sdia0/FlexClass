@@ -9,37 +9,17 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/tvWeek"
+        android:text="Числитель"
+        android:textSize="24sp"
+        android:textColor="@color/white"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/dark_blue"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/spWeek"
-            android:text="Четная неделя"
-            android:textSize="24sp"
-            android:textColor="@color/white"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="3"
-            android:padding="8dp"
-            android:layout_marginStart="10dp"/>
-
-        <ImageButton
-            android:id="@+id/btnAdd"
-            android:layout_width="0dp"
-            android:layout_height="60dp"
-            android:layout_marginVertical="5dp"
-            android:padding="4dp"
-            android:layout_weight="1"
-            android:background="@null"
-            android:scaleType="fitCenter"
-            android:src="@drawable/add"
-            app:tint="@color/white"/>
-
-    </LinearLayout>
+        android:layout_height="70dp"
+        android:gravity="center_vertical"
+        android:paddingVertical="8dp"
+        android:paddingHorizontal="16dp"
+        android:background="@color/dark_blue"/>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -48,7 +28,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        >
 
         <include
             android:id="@+id/mondayLayout"

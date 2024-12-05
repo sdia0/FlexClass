@@ -1,58 +1,210 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
-    android:background="@drawable/round_item"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:padding="16dp"
-    android:weightSum="4"
-    tools:context=".ItemActivity">
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="vertical">
 
-    <!-- Первый элемент: время -->
-    <TextView
-        android:id="@+id/tvTime"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:id="@+id/defaultMode"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
-        android:layout_weight="1"
-        android:gravity="start"
-        android:text="10:00"
-        android:textColor="@color/white"
-        android:textSize="20sp" />
+        android:background="@drawable/round_item"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:paddingBottom="8dp"
+        android:weightSum="4">
 
-    <!-- Разделитель (круг) -->
-    <View
-        android:id="@+id/vFormat"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginEnd="20dp"
-        android:background="@drawable/circle_shape" />
+        <!-- Первый элемент: время -->
+        <TextView
+            android:id="@+id/tvTime"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            android:gravity="start"
+            android:text="10:00"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
 
-    <!-- Второй элемент: предмет -->
-    <TextView
-        android:id="@+id/tvSubject"
-        android:layout_width="0dp"
+        <View
+            android:id="@+id/vFormat"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="20dp"
+            android:background="@drawable/circle_shape" />
+
+        <TextView
+            android:id="@+id/tvSubject"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:layout_weight="2"
+            android:gravity="start"
+            android:text="Системы ИИ"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/tvType"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="start"
+            android:text="лк"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/editMode"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
-        android:layout_weight="2"
-        android:gravity="start"
-        android:text="Системы ИИ"
-        android:textColor="@color/white"
-        android:textSize="20sp" />
+        android:background="@drawable/round_item"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:visibility="gone">
 
-    <!-- Третий элемент: тип -->
-    <TextView
-        android:id="@+id/tvType"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:gravity="start"
-        android:text="лк"
-        android:textColor="@color/white"
-        android:textSize="20sp" />
+        <ImageView
+            android:id="@+id/btnExit"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/exit"
+            android:layout_gravity="end"
+            app:tint="@color/white"
+            android:layout_marginTop="15dp"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="8dp"
+            android:weightSum="8">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="от"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/startTime"
+                style="@style/CustomEditText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:paddingVertical="8dp"
+                android:paddingStart="15dp"
+                android:textColorHint="@color/white"
+                android:textSize="24sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="до"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/endTime"
+                style="@style/CustomEditText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="3"
+                android:paddingVertical="8dp"
+                android:paddingStart="15dp"
+                android:textColorHint="@color/white"
+                android:textSize="24sp" />
+
+        </LinearLayout>
+
+        <Spinner
+            android:id="@+id/spFormat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingVertical="8dp" />
+
+        <EditText
+            android:id="@+id/etLinkOrAud"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:hint="Аудитория/ссылка"
+            android:paddingVertical="8dp"
+            android:paddingStart="15dp"
+            android:textColorHint="@color/white"
+            android:textSize="24sp" />
+
+        <EditText
+            android:id="@+id/etSubject"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:hint="Название предмета"
+            android:paddingVertical="8dp"
+            android:paddingStart="15dp"
+            android:textColorHint="@color/white"
+            android:textSize="24sp" />
+
+        <Spinner
+            android:id="@+id/spType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="15dp"
+            android:paddingVertical="8dp" />
+
+        <Spinner
+            android:id="@+id/spDay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="15dp"
+            android:paddingVertical="8dp" />
+
+        <Spinner
+            android:id="@+id/spWeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="15dp"
+            android:paddingVertical="8dp" />
+
+        <Button
+            android:id="@+id/btnOk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:backgroundTint="@color/blue"
+            android:text="OK"
+            android:textColor="@color/white"
+            android:textSize="20dp" />
+
+        <Button
+            android:id="@+id/btnDelete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:backgroundTint="@color/blue"
+            android:text="Удалить"
+            android:textColor="@color/white"
+            android:textSize="20dp" />
+
+    </LinearLayout>
 
 </LinearLayout>

@@ -9,4 +9,5 @@
     <color name="light_yellow">#ffd60a</color>
     <color name="orange">#ffa523</color>
     <color name="stroke">#CCCCCC</color>
+    <color name="grey">#808080</color>
 </resources>

@@ -11,53 +11,58 @@
 
     <TextView
         android:id="@+id/tvWeek"
-        android:text="Числитель"
-        android:textSize="24sp"
-        android:textColor="@color/white"
         android:layout_width="match_parent"
         android:layout_height="70dp"
+        android:background="@color/dark_blue"
         android:gravity="center_vertical"
-        android:paddingVertical="8dp"
         android:paddingHorizontal="16dp"
-        android:background="@color/dark_blue"/>
+        android:paddingVertical="8dp"
+        android:text="Числитель"
+        android:textColor="@color/white"
+        android:textSize="24sp" />
 
-    <ScrollView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        >
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <include
-            android:id="@+id/mondayLayout"
-            layout="@layout/days" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-        <include
-            android:id="@+id/tuesdayLayout"
-            layout="@layout/days" />
+                <include
+                    android:id="@+id/mondayLayout"
+                    layout="@layout/days" />
 
-        <include
-            android:id="@+id/wednesdayLayout"
-            layout="@layout/days" />
+                <include
+                    android:id="@+id/tuesdayLayout"
+                    layout="@layout/days" />
 
-        <include
-            android:id="@+id/thursdayLayout"
-            layout="@layout/days" />
+                <include
+                    android:id="@+id/wednesdayLayout"
+                    layout="@layout/days" />
 
-        <include
-            android:id="@+id/fridayLayout"
-            layout="@layout/days" />
+                <include
+                    android:id="@+id/thursdayLayout"
+                    layout="@layout/days" />
 
-        <include
-            android:id="@+id/saturdayLayout"
-            layout="@layout/days" />
+                <include
+                    android:id="@+id/fridayLayout"
+                    layout="@layout/days" />
 
-    </LinearLayout>
+                <include
+                    android:id="@+id/saturdayLayout"
+                    layout="@layout/days" />
 
-    </ScrollView>
+            </LinearLayout>
+
+        </ScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </LinearLayout>
 

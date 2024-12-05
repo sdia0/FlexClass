@@ -11,6 +11,10 @@ public class DaySchedule {
         this.lessons = lessons;
     }
 
+    public void setLessons(List<Lesson> lessons) {
+        this.lessons = lessons;
+    }
+
     public String getDayName() {
         return dayName;
     }

@@ -32,7 +32,6 @@ public class DbHelper extends SQLiteOpenHelper {
                 "aud TEXT," +
                 "link TEXT)");
 
-
         // Начало транзакции для вставки данных
         /*db.beginTransaction();
         try {
@@ -53,15 +52,6 @@ public class DbHelper extends SQLiteOpenHelper {
             Log.e("DB_ERROR", "Error while inserting data: " + e.getMessage());
         } finally {
             db.endTransaction(); // Завершить транзакцию
-        }*/
-
-        /*db.execSQL("create table genres(" +
-                "genre TEXT not null)");
-
-        String[] genres = {"Жанры", "Художественная литература", "Научная литература", "Научная фантастика",
-                "Фэнтези", "Детектив", "Триллер", "Роман"};
-        for (String genre : genres) {
-            db.execSQL("INSERT INTO genres (genre) VALUES (?)", new Object[]{genre});
         }*/
     }
 
@@ -87,23 +77,6 @@ public class DbHelper extends SQLiteOpenHelper {
 
         return lessons;
     }
-
-    // Метод для получения массива жанров
-    /*public List<String> getGenres() {
-        List<String> genres = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT genre FROM genres", null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                genres.add(cursor.getString(0));
-            } while (cursor.moveToNext());
-        }
-
-        cursor.close();
-        db.close();
-        return genres;
-    }*/
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

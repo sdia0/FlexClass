@@ -6,6 +6,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -44,6 +45,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -72,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     List<String> ruDays = new ArrayList<>(Arrays.asList("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"));
     List<String> engDays = new ArrayList<>(Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"));
     List<DaySchedule> weekSchedule = new ArrayList<>();
-    @SuppressLint("ResourceAsColor")
+    private SwipeRefreshLayout swipeRefreshLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         db = new DbHelper(this);
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
+        // fillData();
 
         // Определение текущей недели
         Calendar currentCalendar = Calendar.getInstance();
@@ -102,8 +106,36 @@ public class MainActivity extends AppCompatActivity {
         week.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (week.getText().toString().equals("Знаменатель")) week.setText("Числитель");
-                else week.setText("Знаменатель");
+                if (week.getText().toString().equals("Знаменатель")) {
+                    DayAdapter.week = "Числитель";
+                    week.setText("Числитель");
+                }
+                else {
+                    DayAdapter.week = "Знаменатель";
+                    week.setText("Знаменатель");
+                }
+                // Подгрузить расписание для выбранной недели
+                setDayAdapter("Понедельник");
+                setDayAdapter("Вторник");
+                setDayAdapter("Среда");
+                setDayAdapter("Четверг");
+                setDayAdapter("Пятница");
+                setDayAdapter("Суббота");
+            }
+        });
+
+        // Устанавливаем слушатель для действия обновления
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Подгрузить последние данные и отрисовать адаптеры заново
+                setDayAdapter("Понедельник");
+                setDayAdapter("Вторник");
+                setDayAdapter("Среда");
+                setDayAdapter("Четверг");
+                setDayAdapter("Пятница");
+                setDayAdapter("Суббота");
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
 
@@ -130,6 +162,8 @@ public class MainActivity extends AppCompatActivity {
             Spinner spTime = dayView.findViewById(R.id.spTime_days);
 
             EditText etLinkOrAud = dayView.findViewById(R.id.etLinkOrAud_days);
+            ImageButton btnPaste = dayView.findViewById(R.id.btnPaste_days);
+            ImageButton btnClear = dayView.findViewById(R.id.btnClear_days);
             EditText etSubject = dayView.findViewById(R.id.etSubject_days);
 
             LinearLayout editMod = dayView.findViewById(R.id.editMode_days);
@@ -142,14 +176,18 @@ public class MainActivity extends AppCompatActivity {
             Button bLk = dayView.findViewById(R.id.bLk_days);
             Button bPr = dayView.findViewById(R.id.bPr_days);
 
+            Context context = dayView.getContext();
             // Установка значений по умолчанию
             String[] selectedFormat = {"Онлайн"};
-            bOnline.setBackgroundColor(R.color.white);
-            bOffline.setBackgroundColor(R.color.blue);
+            setSelectedButton(bOnline, context);
+            resetButton(bOffline, context);
+            etLinkOrAud.setHint("Ссылка");
+            btnPaste.setVisibility(View.VISIBLE);
+            btnClear.setVisibility(View.VISIBLE);
             String[] selectedType = {"лб"};
-            bLb.setBackgroundColor(R.color.white);
-            bLk.setBackgroundColor(R.color.blue);
-            bPr.setBackgroundColor(R.color.blue);
+            setSelectedButton(bLb, context);
+            resetButton(bLk, context);
+            resetButton(bPr, context);
             final String[] selectedTime = {times.get(0)};
             final String[] selectedWeek = {"Каждую неделю"};
             final String[] selectedDay = {"Понедельник"};
@@ -160,63 +198,70 @@ public class MainActivity extends AppCompatActivity {
 
             // Кнопка ДОБАВИТЬ, открывающая окно ввода данных
             int finalI = i;
-            add.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    editMod.setVisibility(View.VISIBLE);
-                    selectedDay[0] = ruDays.get(finalI);
-                }
+            add.setOnClickListener(v -> {
+                editMod.setVisibility(View.VISIBLE);
+                selectedDay[0] = ruDays.get(finalI);
             });
 
-            bOnline.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    selectedFormat[0] = "Онлайн";
-                    bOnline.setBackgroundColor(ContextCompat.getColor(v.getContext(), R.color.white)); // Установить белый цвет
-                    bOffline.setBackgroundColor(ContextCompat.getColor(v.getContext(), R.color.blue)); // Установить синий цвет
-                }
+            bOnline.setOnClickListener(v -> {
+                selectedFormat[0] = "Онлайн";
+                setSelectedButton(bOnline, context);
+                resetButton(bOffline, context);
+                etLinkOrAud.setHint("Ссылка");
+                btnPaste.setVisibility(View.VISIBLE);
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) etLinkOrAud.getLayoutParams();
+                params.weight = 6;
+                etLinkOrAud.setLayoutParams(params);
             });
 
-            bOffline.setOnClickListener(new View.OnClickListener() {
-                @SuppressLint("ResourceAsColor")
-                @Override
-                public void onClick(View v) {
-                    selectedFormat[0] = "Оффлайн";
-                    bOffline.setBackgroundColor(R.color.white);
-                    bOnline.setBackgroundColor(R.color.blue);
-                }
+            bOffline.setOnClickListener(v -> {
+                selectedFormat[0] = "Оффлайн";
+                setSelectedButton(bOffline, context);
+                resetButton(bOnline, context);
+                etLinkOrAud.setHint("Аудитория");
+                btnPaste.setVisibility(View.GONE);
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) etLinkOrAud.getLayoutParams();
+                params.weight = 7;
+                etLinkOrAud.setLayoutParams(params);
             });
 
-            bLb.setOnClickListener(new View.OnClickListener() {
-                @SuppressLint("ResourceAsColor")
-                @Override
-                public void onClick(View v) {
-                    selectedType[0] = "лб";
-                    bLb.setBackgroundColor(R.color.white);
-                    bLk.setBackgroundColor(R.color.blue);
-                    bPr.setBackgroundColor(R.color.blue);
-                }
+            bLb.setOnClickListener(v -> {
+                selectedType[0] = "лб";
+                setSelectedButton(bLb, context);
+                resetButton(bLk, context);
+                resetButton(bPr, context);
             });
 
-            bLk.setOnClickListener(new View.OnClickListener() {
-                @SuppressLint("ResourceAsColor")
-                @Override
-                public void onClick(View v) {
-                    selectedType[0] = "лк";
-                    bLb.setBackgroundColor(R.color.blue);
-                    bLk.setBackgroundColor(R.color.white);
-                    bPr.setBackgroundColor(R.color.blue);
-                }
+            bLk.setOnClickListener(v -> {
+                selectedType[0] = "лк";
+                setSelectedButton(bLk, context);
+                resetButton(bLb, context);
+                resetButton(bPr, context);
             });
 
-            bPr.setOnClickListener(new View.OnClickListener() {
-                @SuppressLint("ResourceAsColor")
-                @Override
-                public void onClick(View v) {
-                    selectedType[0] = "пр";
-                    bLb.setBackgroundColor(R.color.blue);
-                    bLk.setBackgroundColor(R.color.blue);
-                    bPr.setBackgroundColor(R.color.white);
+            bPr.setOnClickListener(v -> {
+                selectedType[0] = "пр";
+                setSelectedButton(bPr, context);
+                resetButton(bLk, context);
+                resetButton(bLb, context);
+            });
+
+            btnClear.setOnClickListener(v -> {
+                etLinkOrAud.setText("");
+            });
+
+            btnPaste.setOnClickListener(v -> {
+                // Получаем буфер обмена
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                if (clipboard != null && clipboard.hasPrimaryClip()) {
+                    // Получаем текст из буфера обмена
+                    CharSequence text = clipboard.getPrimaryClip().getItemAt(0).getText();
+                    if (text != null) {
+                        // Вставляем текст в EditText
+                        etLinkOrAud.setText(text);
+                    } else {
+                        Toast.makeText(MainActivity.this, "Буфер обмена пуст", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
@@ -228,7 +273,10 @@ public class MainActivity extends AppCompatActivity {
                     String linkOrAud = etLinkOrAud.getText().toString();
 
                     // Если хоть одно поле пустое
-
+                    if (subject.isEmpty() || linkOrAud.isEmpty()) {
+                        Toast.makeText(MainActivity.this, "Заполните все поля!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
 
                     // Добавление новой записи
                     Lesson newLesson = new Lesson(
@@ -241,20 +289,31 @@ public class MainActivity extends AppCompatActivity {
                     );
                     newLesson.setAudOrLink(linkOrAud);
                     boolean result = db.insertData(newLesson);
-                    if (result) {
-                        Toast.makeText(getApplicationContext(),
-                                "Data inserted",
-                                Toast.LENGTH_SHORT);
-                    } else
-                        Toast.makeText(getApplicationContext(),
-                                "Data not inserted",
-                                Toast.LENGTH_SHORT);
 
-                    // Установка данных на адаптер
-                    setDayAdapter(selectedDay[0]);
-                    editMod.setVisibility(View.GONE);
-                    etLinkOrAud.setText("");
-                    etSubject.setText("");
+                    // Проверка
+                    if (result) {
+                        // Закрыть окно добавления
+                        editMod.setVisibility(View.GONE);
+
+                        // Установка данных на адаптер
+                        setDayAdapter(selectedDay[0]);
+
+                        // Установка значений по умолчанию
+                        etLinkOrAud.setText("");
+                        etSubject.setText("");
+                        selectedFormat[0] = "Онлайн";
+                        setSelectedButton(bOnline, context);
+                        resetButton(bOffline, context);
+                        etLinkOrAud.setHint("Ссылка");
+                        selectedType[0] = "лб";
+                        setSelectedButton(bLb, context);
+                        resetButton(bLk, context);
+                        resetButton(bPr, context);
+                        selectedTime[0] = times.get(0);
+                        selectedWeek[0] = "Каждую неделю";
+                        selectedDay[0] = "Понедельник";
+                    }
+                    else Toast.makeText(getApplicationContext(), "Возникла ошибка. Повторите попытку", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -263,8 +322,21 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     editMod.setVisibility(View.GONE);
+
+                    // Установка значений по умолчанию
                     etLinkOrAud.setText("");
                     etSubject.setText("");
+                    selectedFormat[0] = "Онлайн";
+                    setSelectedButton(bOnline, context);
+                    resetButton(bOffline, context);
+                    etLinkOrAud.setHint("Ссылка");
+                    selectedType[0] = "лб";
+                    setSelectedButton(bLb, context);
+                    resetButton(bLk, context);
+                    resetButton(bPr, context);
+                    selectedTime[0] = times.get(0);
+                    selectedWeek[0] = "Каждую неделю";
+                    selectedDay[0] = "Понедельник";
                 }
             });
             RecyclerView recyclerView = dayView.findViewById(R.id.dayRecyclerView);
@@ -298,11 +370,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+    public void setSelectedButton(Button button, Context context) {
+        button.setTextColor(ContextCompat.getColor(context, R.color.blue));
+        button.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
+    }
+    public void resetButton(Button button, Context context) {
+        button.setTextColor(ContextCompat.getColor(context, R.color.white));
+        button.setBackgroundColor(ContextCompat.getColor(context, R.color.blue));
+    }
     public void setDayAdapter(String day) {
+        // Перевод названия дня на английский
+        String engDay = engDays.get(ruDays.indexOf(day));
+
         // Найти индекс дня в расписании
         int index = -1;
         for (int i = 0; i < weekSchedule.size(); i++) {
-            if (weekSchedule.get(i).getDayName().equals(day)) {
+            if (weekSchedule.get(i).getDayName().equals(engDay)) {
                 index = i;  // Сохраняем индекс найденного дня
                 break;
             }
@@ -311,7 +394,7 @@ public class MainActivity extends AppCompatActivity {
         // Если день найден, заменяем объект
         if (index != -1) {
             // Получаем новый объект DaySchedule для данного дня
-            DaySchedule newSchedule = new DaySchedule(engDays.get(index), db.getScheduleForDay(week.getText().toString(), ruDays.get(index)));
+            DaySchedule newSchedule = new DaySchedule(engDay, db.getScheduleForDay(week.getText().toString(), ruDays.get(index)));
             // Заменяем старый объект новым в списке
             weekSchedule.set(index, newSchedule);
             // Установка адаптера
@@ -326,39 +409,6 @@ public class MainActivity extends AppCompatActivity {
             adapter.updateDayTitle(tvDay, ruDays.get(index));
         }
     }
-    /*public void setDayAdapters() {
-        //fillData();
-        weekSchedule.add(new DaySchedule("Monday", db.getScheduleForDay(week.getText().toString(), ruDays.get(0))));
-        weekSchedule.add(new DaySchedule("Tuesday", db.getScheduleForDay(week.getText().toString(), ruDays.get(1))));
-        weekSchedule.add(new DaySchedule("Wednesday", db.getScheduleForDay(week.getText().toString(), ruDays.get(2))));
-        weekSchedule.add(new DaySchedule("Thursday", db.getScheduleForDay(week.getText().toString(), ruDays.get(3))));
-        weekSchedule.add(new DaySchedule("Friday", db.getScheduleForDay(week.getText().toString(), ruDays.get(4))));
-        weekSchedule.add(new DaySchedule("Saturday", db.getScheduleForDay(week.getText().toString(), ruDays.get(5))));
-
-        // Привязка каждого адаптера к своим View
-        for (int i = 0; i < weekSchedule.size(); i++) {
-            int resId = getResources().getIdentifier(weekSchedule.get(i).getDayName().toLowerCase() + "Layout", "id", getPackageName());
-            View dayView = findViewById(resId);
-            TextView tvDay = dayView.findViewById(R.id.tvDay);
-            Button add = dayView.findViewById(R.id.addLessonByDay);
-            int finalI = i;
-            add.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    editMod.setVisibility(View.VISIBLE);
-                    selectedWeek = "Каждую неделю";
-                    selectedDay = ruDays.get(finalI);
-                    setSpinners();
-                }
-            });
-            RecyclerView recyclerView = dayView.findViewById(R.id.dayRecyclerView);
-            weekSchedule.get(i).getLessons().sort(Comparator.comparing(Lesson::getTimeStart));
-            DayAdapter adapter = new DayAdapter(this, weekSchedule.get(i), db, this);
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-            recyclerView.setAdapter(adapter);
-            adapter.updateDayTitle(tvDay, ruDays.get(i));
-        }
-    }*/
     void fillData() {
         // Данные для вставки
         List<Lesson> lessons = new ArrayList<>();

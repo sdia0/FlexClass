@@ -1,40 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:background="@color/darker_blue">
+    android:background="@color/darker_blue"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="11"
         android:layout_marginHorizontal="10dp"
         android:layout_marginBottom="10dp"
-        >
+        android:orientation="horizontal"
+        android:weightSum="11">
 
         <Button
             android:id="@+id/addLessonByDay"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@color/darker_blue"
             android:padding="8dp"
             android:text="+"
             android:textColor="@color/white"
-            android:textSize="24sp"
-            android:backgroundTint="@color/darker_blue"/>
+            android:textSize="24sp" />
 
         <TextView
             android:id="@+id/tvDay"
             android:layout_width="0dp"
-            android:layout_weight="10"
             android:layout_height="wrap_content"
+            android:layout_weight="10"
             android:padding="8dp"
             android:text="Day Title"
             android:textColor="@color/white"
-            android:textSize="24sp"/>
+            android:textSize="24sp" />
 
     </LinearLayout>
 
@@ -42,10 +41,12 @@
         android:id="@+id/editMode_days"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
         android:background="@drawable/round_item"
         android:orientation="vertical"
         android:paddingHorizontal="16dp"
-        android:layout_margin="10dp"
         android:visibility="gone"
         >
 
@@ -53,11 +54,10 @@
             android:id="@+id/btnExit_days"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:src="@drawable/exit"
             android:layout_gravity="end"
-            app:tint="@color/white"
             android:layout_marginTop="15dp"
-            />
+            android:src="@drawable/exit"
+            app:tint="@color/white" />
 
         <EditText
             android:id="@+id/etSubject_days"
@@ -72,11 +72,11 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:gravity="center"
             android:orientation="horizontal"
             android:paddingBottom="8dp"
-            android:weightSum="8"
-            android:gravity="center"
-            android:layout_marginTop="15dp">
+            android:weightSum="8">
 
             <TextView
                 android:layout_width="0dp"
@@ -90,9 +90,9 @@
             <Spinner
                 android:id="@+id/spTime_days"
                 android:layout_width="0dp"
-                android:layout_weight="6"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_weight="6"
                 android:paddingVertical="8dp" />
 
         </LinearLayout>
@@ -100,78 +100,112 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:gravity="center"
             android:orientation="horizontal"
-            android:weightSum="8"
-            android:gravity="center">
+            android:weightSum="8">
 
             <Button
                 android:id="@+id/bOnline_days"
-                android:text="Онлайн"
                 android:layout_width="0dp"
-                android:layout_weight="4"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/blue"
                 android:layout_marginEnd="10dp"
-                android:textSize="22sp"/>
+                android:layout_weight="4"
+                android:backgroundTint="@color/blue"
+                android:text="Онлайн"
+                android:textSize="22sp" />
 
             <Button
                 android:id="@+id/bOffline_days"
-                android:textSize="22sp"
-                android:text="Оффлайн"
                 android:layout_width="0dp"
-                android:layout_weight="4"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/blue"/>
+                android:layout_weight="4"
+                android:backgroundTint="@color/blue"
+                android:text="Оффлайн"
+                android:textSize="22sp" />
 
         </LinearLayout>
-
-        <EditText
-            android:id="@+id/etLinkOrAud_days"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:hint="Аудитория/ссылка"
-            android:paddingVertical="8dp"
-            android:paddingStart="15dp"
-            android:textColorHint="@color/white"
-            android:textSize="24sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:gravity="center"
             android:orientation="horizontal"
-            android:weightSum="9"
+            android:weightSum="8"
+            android:layout_marginTop="15dp">
+
+            <EditText
+                android:id="@+id/etLinkOrAud_days"
+                android:layout_width="0dp"
+                android:layout_weight="6"
+                android:layout_height="wrap_content"
+                android:hint="Аудитория/ссылка"
+                android:paddingVertical="8dp"
+                android:paddingStart="15dp"
+                android:textColorHint="@color/white"
+                android:textSize="24sp" />
+
+            <ImageButton
+                android:id="@+id/btnPaste_days"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="40dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                android:backgroundTint="@color/blue"
+                app:tint="@color/white"
+                android:src="@drawable/paste"
+                android:scaleType="fitCenter"/>
+
+            <ImageButton
+                android:id="@+id/btnClear_days"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="40dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                android:backgroundTint="@color/blue"
+                app:tint="@color/white"
+                android:src="@drawable/clear"
+                android:scaleType="fitCenter"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal"
             android:paddingTop="8dp"
-            android:gravity="center">
+            android:weightSum="9">
 
             <Button
                 android:id="@+id/bLb_days"
-                android:textSize="24sp"
-                android:text="лб"
                 android:layout_width="0dp"
-                android:layout_weight="3"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_weight="3"
                 android:backgroundTint="@color/blue"
-                android:layout_marginEnd="10dp"/>
+                android:text="лб"
+                android:textSize="24sp" />
 
             <Button
                 android:id="@+id/bLk_days"
-                android:textSize="24sp"
-                android:text="лк"
                 android:layout_width="0dp"
-                android:layout_weight="3"
-                android:layout_marginEnd="10dp"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/blue"/>
+                android:layout_marginEnd="10dp"
+                android:layout_weight="3"
+                android:backgroundTint="@color/blue"
+                android:text="лк"
+                android:textSize="24sp" />
 
             <Button
                 android:id="@+id/bPr_days"
-                android:textSize="24sp"
-                android:text="пр"
                 android:layout_width="0dp"
-                android:layout_weight="3"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/blue"/>
+                android:layout_weight="3"
+                android:backgroundTint="@color/blue"
+                android:text="пр"
+                android:textSize="24sp" />
 
         </LinearLayout>
 

@@ -64,27 +64,40 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/editMode"
+        android:id="@+id/editMode_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
         android:background="@drawable/round_item"
         android:orientation="vertical"
         android:paddingHorizontal="16dp"
-        android:visibility="gone">
+        android:visibility="gone"
+        >
 
         <ImageView
-            android:id="@+id/btnExit"
+            android:id="@+id/btnExit_item"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:src="@drawable/exit"
             android:layout_gravity="end"
-            app:tint="@color/white"
             android:layout_marginTop="15dp"
-            />
+            android:src="@drawable/exit"
+            app:tint="@color/white" />
+
+        <EditText
+            android:id="@+id/etSubject_item"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Название предмета"
+            android:paddingVertical="8dp"
+            android:paddingStart="15dp"
+            android:textColorHint="@color/white"
+            android:textSize="24sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:gravity="center"
             android:orientation="horizontal"
             android:paddingBottom="8dp"
             android:weightSum="8">
@@ -92,77 +105,136 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:gravity="center"
-                android:text="от"
+                android:text="Время"
                 android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:textSize="24sp" />
 
-            <EditText
-                android:id="@+id/startTime"
-                style="@style/CustomEditText"
+            <Spinner
+                android:id="@+id/spTime_item"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="6"
+                android:paddingVertical="8dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="8">
+
+            <Button
+                android:id="@+id/bOnline_item"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_weight="4"
+                android:backgroundTint="@color/blue"
+                android:text="Онлайн"
+                android:textSize="22sp" />
+
+            <Button
+                android:id="@+id/bOffline_item"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:backgroundTint="@color/blue"
+                android:text="Оффлайн"
+                android:textSize="22sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="8"
+            android:layout_marginTop="15dp">
+
+            <EditText
+                android:id="@+id/etLinkOrAud_item"
+                android:layout_width="0dp"
+                android:layout_weight="6"
+                android:layout_height="wrap_content"
+                android:hint="Аудитория/ссылка"
                 android:paddingVertical="8dp"
                 android:paddingStart="15dp"
                 android:textColorHint="@color/white"
                 android:textSize="24sp" />
 
-            <TextView
+            <ImageButton
+                android:id="@+id/btnPaste_item"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:text="до"
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:layout_height="40dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                android:backgroundTint="@color/blue"
+                app:tint="@color/white"
+                android:src="@drawable/paste"
+                android:scaleType="fitCenter"/>
 
-            <EditText
-                android:id="@+id/endTime"
-                style="@style/CustomEditText"
+            <ImageButton
+                android:id="@+id/btnClear_item"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="40dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                android:backgroundTint="@color/blue"
+                app:tint="@color/white"
+                android:src="@drawable/clear"
+                android:scaleType="fitCenter"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="8dp"
+            android:weightSum="9">
+
+            <Button
+                android:id="@+id/bLb_item"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="10dp"
                 android:layout_weight="3"
-                android:paddingVertical="8dp"
-                android:paddingStart="15dp"
-                android:textColorHint="@color/white"
+                android:backgroundTint="@color/blue"
+                android:text="лб"
+                android:textSize="24sp" />
+
+            <Button
+                android:id="@+id/bLk_item"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_weight="3"
+                android:backgroundTint="@color/blue"
+                android:text="лк"
+                android:textSize="24sp" />
+
+            <Button
+                android:id="@+id/bPr_item"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:backgroundTint="@color/blue"
+                android:text="пр"
                 android:textSize="24sp" />
 
         </LinearLayout>
 
         <Spinner
-            android:id="@+id/spFormat"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:paddingVertical="8dp" />
-
-        <EditText
-            android:id="@+id/etLinkOrAud"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:hint="Аудитория/ссылка"
-            android:paddingVertical="8dp"
-            android:paddingStart="15dp"
-            android:textColorHint="@color/white"
-            android:textSize="24sp" />
-
-        <EditText
-            android:id="@+id/etSubject"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:hint="Название предмета"
-            android:paddingVertical="8dp"
-            android:paddingStart="15dp"
-            android:textColorHint="@color/white"
-            android:textSize="24sp" />
-
-        <Spinner
-            android:id="@+id/spType"
+            android:id="@+id/spDay_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -170,15 +242,7 @@
             android:paddingVertical="8dp" />
 
         <Spinner
-            android:id="@+id/spDay"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginTop="15dp"
-            android:paddingVertical="8dp" />
-
-        <Spinner
-            android:id="@+id/spWeek"
+            android:id="@+id/spWeek_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -186,7 +250,7 @@
             android:paddingVertical="8dp" />
 
         <Button
-            android:id="@+id/btnOk"
+            android:id="@+id/btnOk_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
@@ -196,7 +260,7 @@
             android:textSize="20dp" />
 
         <Button
-            android:id="@+id/btnDelete"
+            android:id="@+id/btnDelete_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="15dp"
